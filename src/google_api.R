@@ -18,7 +18,7 @@ fetch_data = function(preamble, list){
   }
   return(substr(data, 0, nchar(data)-1))
 }
-
+#CAMBIAR DRIVING
 get_url = function(origins, destinations, key, mode = "driving", language = "es"){
   # install(pkg)
   # url base for distance matrix api
@@ -43,5 +43,5 @@ get_data = function(api_url){
 
 # To Complete
 parse_data = function(json){
-  
+  toJSON(json, pretty=TRUE)
 }
