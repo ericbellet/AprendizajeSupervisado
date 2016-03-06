@@ -33,7 +33,23 @@ df$Disponibles[grepl("4 Singola", df$`Habitaciones Disponibles`)] <- "4"
 
 df$Disponibles[is.na(df$Disponibles)] <- 1
 
-df.expanded <- df[rep(seq_len(nrow(df)), df$Disponibles),]
+#Replico las filas que posee mas de una habitacion disponible.
+df <- df[rep(seq_len(nrow(df)), df$Disponibles),]
+
+#Asigno el precio correspondiente a cada habitacion.
+
+for (i in 1:nrow(df)){
+
+array <- na.omit(as.numeric(unlist(strsplit(unlist(df$`Precio Mensual`[i]), 
+                                            "[^0-9]+"))))
+  if (df$Disponibles[i] == 1){
+    df$Precio[i] <- array[1]
+    
+  }
+   
+}#endfor
+
+
 
 #DIVIDO EL DATAFRAME EN DOS, MUJERES Y HOMBRES.
 df$Sexo <- df$Notas
