@@ -102,6 +102,85 @@ while (i != (nrow(df)+1)) {
 
 }#endwhile
 #---------------------------------------
+#Etiqueto la columna descripcion.
+separador <- function(x)
+  splat <- unlist(strsplit(x, ", | e "))
+
+df$Descripción2 <- lapply(df$Descripción, separador)
+x <- vector()
+df$Descripción3 <- 0
+for (i in 1:nrow(df)) {
+   for (j in 1:length(unlist(df$Descripción2[i]))) {
+  
+    x[1] <- as.numeric(unlist(strsplit(unlist(df$Descripción2[i])[j], 
+                             "[^0-9]+")))
+
+    if (is.na(x) == TRUE){
+      x[1] <- 1
+    }
+  
+    if (grepl("Ingresso", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (5 * x[1])
+    }
+    if (grepl("ingresso", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (5 * x[1])
+    }
+
+    if (grepl("cucina", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (20 * x[1])
+    }
+    
+    if (grepl("stanze", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (10 * x[1])
+    }
+    
+    if (grepl("camere", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (10 * x[1])
+    }
+    
+    if (grepl("camera", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (10 * x[1])
+    }
+    
+    if (grepl("bagni", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (15 * x[1])
+    }
+    
+    if (grepl("bagno", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (15 * x[1])
+    }
+    
+    if (grepl("disimpegno", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (5 * x[1])
+    }
+    
+    if (grepl("balcone", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (5 * x[1])
+    }
+    
+    if (grepl("sala da pranzo", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (30 * x[1])
+    }
+    
+    if (grepl("doppio soggiorno", unlist(df$Descripción2[i])[j]) == TRUE){
+      df$Descripción3[i] <- df$Descripción3[i] + (20 * x[1])
+    }
+  }#endfor
+}#endfor
+
+x <- unlist(df$Descripción2[1])
+x[1]
+Ingresso
+cucina
+stanze, camere
+bagni bagno
+cucina
+disimpegno
+balcone
+doppio soggiorno
+sala da pranzo
+salone doppio
+
 #Coloco etiquetas correspondientes a cada habitacion.
 #Todo Incluido.
 df$GastosExtras[grepl("TUTTO INCLUSO", df$`Precio Mensual`)] <- "0"
@@ -115,11 +194,6 @@ condominio, acqua, riscaldamento inclusi e tassa rifiuti inclusi
 condominio incluso
 df$`Precio Mensual`[18]
 
-#Etiqueto la columna descripcion.
-separador <- function(x)
-  splat <- strsplit(x, ",")
-
-df$Descripción2 <- lapply(df$Descripción, separador)
 
 
 
