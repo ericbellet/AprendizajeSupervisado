@@ -65,5 +65,5 @@ parse_data = function(lista){
   
   
   return(c(distancia,tiempo))
-  #return((as.data.frame(lista$rows$elements)[1,]))
+ 
 }

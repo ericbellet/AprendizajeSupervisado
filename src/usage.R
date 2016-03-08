@@ -30,4 +30,8 @@ time <- cbind(time)
 
 dataframe <- cbind(ori,dist,time)
 
-}
+
+}#endfor
+
+
+
