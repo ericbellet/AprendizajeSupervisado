@@ -1,32 +1,33 @@
-
 # Seleccionar google_api.R en su sistema de archivos
 source(file.choose())
+df <- read_excel("C:/Users/EricBellet/Desktop/AprendizajeSupervisado/data/hogares.xlsx")
+df <- na.omit(df)
+df$Foto <- NULL
 
-origen = c("Via Paolo Emilio", "Vancouver BC", "Seattle")
-destino =c("Piazzale Aldo Moro", "San Francisco", "Victoria BC")
+dataframe <- data.frame()
+dist <- vector()
+time <- vector()
+ori <- vector()
 
+
+#destino =c("Piazzale Aldo Moro","Piazzale Aldo Moro","Piazzale Aldo Moro","Piazzale Aldo Moro","Piazzale Aldo Moro","Piazzale Aldo Moro","Piazzale Aldo Moro","Piazzale Aldo Moro","Piazzale Aldo Moro")
+#origen = c("Piazza Massa Carrara","Via Roberto Ferruzzi","Via Roberto Ferruzzi","Via Roberto Ferruzzi","Via Roberto Ferruzzi","Via Roberto Ferruzzi","Via Roberto Ferruzzi","Via Roberto Ferruzzi","Via Roberto Ferruzzi","Via Roberto Ferruzzi")
+destino =c("Piazzale Aldo Moro")
+for (origen in df$Dirección){
+origen <- strsplit(as.character(origen), "\n")
 # Colocar su API Key 
 api_key = "AIzaSyAjvofBw1RWb-hBEXg9ZXvToXlndevczxg"
-
 api_url = get_url(origen, destino, api_key)
-
 datos = get_data(api_url)
+timedistancia = parse_data(datos)
 
-json = parse_data(datos)
-toJSON(data.frame(json))
-cat(json)
-x <- fromJSON(json)
-fromJSON('{"value" : "Z\\u00FCrich"}')
-x <- fromJSON(json, simplifyVector = FALSE)
-names(x)
-x$destination_addresses[2]
 
-json_file <-json
+dist <- c(dist,timedistancia[1])
+time <- c(time,timedistancia[2])
+ori <- c(ori, origen)
+dist <- cbind(dist)
+time <- cbind(time)
 
-json_file <- fromJSON(json_file)
+dataframe <- cbind(ori,dist,time)
 
-json_file <- lapply(json_file, function(x) {
-  x[sapply(x, is.null)] <- NA
-  unlist(x)
-})
-do.call("rbind", json_file)
+}

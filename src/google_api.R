@@ -42,6 +42,28 @@ get_data = function(api_url){
 }
 
 # To Complete
-parse_data = function(json){
-  toJSON(json, pretty=TRUE)
+parse_data = function(lista){
+  #distancia <- list()
+  #tiempo <- list()
+  #for (i in 1:length(lista$rows$elements)){
+   #distancia[i] <- lista$rows$elements[[i]][1,1][1]  
+   #tiempo[i] <- lista$rows$elements[[i]][1,2][1]
+      
+  #}
+  distancia <- lista$rows$elements[[1]][1,1][1]  
+  tiempo <- lista$rows$elements[[1]][1,2][1]
+ 
+  #dataframe <- data.frame()
+  #dist <- data.frame()
+  #time <- data.frame()
+  
+  #dist <- rbind(dist,distancia)
+ 
+  #time <- c(time,tiempo)
+  #time <- rbind(time,tiempo)
+  #dataframe <- cbind(dist,time)
+  
+  
+  return(c(distancia,tiempo))
+  #return((as.data.frame(lista$rows$elements)[1,]))
 }
