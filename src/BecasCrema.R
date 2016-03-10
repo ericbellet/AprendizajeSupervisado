@@ -1,14 +1,34 @@
-library(sqldf)
-#Funcion que instala los paquetes necesarios para correr el script.
-install = function(pkg){
+install = function(pkg)
+{
   # Si ya está instalado, no lo instala.
   if (!require(pkg, character.only = TRUE)) {
-    install.packages(pkg, repos = "http:/cran.rstudio.com")
+    install.packages(pkg)
     if (!require(pkg, character.only = TRUE)) stop(paste("load failure:", pkg))
   }
 }
 
-install("sqldf")
+#Instalo automaticamente los paquetes.
+install('sqldf')
+install('dplyr')
+install('class')
+install('FactoMineR')
+install('caret')
+install('rpart')
+install('rpart.plot')
+install('e1071')
+install('som')
+
+#Cargo las librerias.
+library(sqldf)
+library(dplyr)
+library(class)
+library(FactoMineR)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(e1071)
+library(som)
+
 
 #Leemos el .csv
 df <- read.csv("C:/Users/EricBellet/Desktop/AprendizajeSupervisado/data/minable.csv") 
@@ -31,13 +51,96 @@ df$IngresosTotalResponsable <- df$irMensual + df$irOtros
 
 #Calculamos los gastos del responsable economico del estudiante.
 df$grOdontologicos <- as.numeric(df$grOdontologicos)
-df$GastosTotalResponsable <- df$grAlimentacion + df$grTransporte + df$grMedicos + df$grOdontologicos + df$grEducativos + df$grVivienda + df$grServicios + df$grCondominio + df$grOtros
+df$GastosTotalResponsable <- df$grAlimentacion + df$grTransporte + df$grMedicos + 
+  df$grOdontologicos + df$grEducativos + df$grVivienda + df$grServicios + df$grCondominio + 
+  df$grOtros
+
+#Eliminamos las columnas que no vamos a utilizar.
+df$cIdentidad <- NULL
+df$fNacimiento <- NULL
+df$eCivil <- NULL
+df$jReprobadas <- NULL
+df$pReside <- NULL
+df$dHabitacion <- NULL
+df$cDireccion <- NULL
+df$oSolicitudes <- NULL
+df$aEconomica <- NULL
+df$rating <- NULL
+df$sugerencias <- NULL
+
 
 #Seleccionamos variables predictoras.
-df <- select(df, fNacimiento, sexo, crFamiliar, IngresosTotalPersonal, GastosTotalPersonal, IngresosTotalResponsable, GastosTotalResponsable,mIngreso)
+df <- select(df, sexo, escuela, aIngreso, sCurso, tGrado, mInscritas,
+            pAprobado, eficiencia, mAprobadas, mRetiradas, mReprobadas, pRenovar, beca,
+            lProcedencia, lResidencia, tVivienda, rEconomico,
+            crFamiliar, IngresosTotalPersonal, GastosTotalPersonal, IngresosTotalResponsable,
+            GastosTotalResponsable,mIngreso)
 
-#Generamos el training y testing data.            
-ind <- sample(2, nrow(df), replace=TRUE, prob=c(0.7, 0.3))
-trainingData <- df[ind==1,]
-testingData <- df[ind==2,]                      
-                      
+#ANALISIS EXPLORATORIO DE LOS DATOS
+PCA <- PCA(df)
+#Obtengo los valore unicos de mIngreso.
+valores <- unique(df$mIngreso)
+totalvalores <- nrow(df)
+probabilidad <- vector()
+#Calculo la probabilidad de cada valor de mIngreso.
+for (i in 1:length(valores)){
+  probabilidad <- c(probabilidad, sum(df$mIngreso == valores[i]) / totalvalores) 
+}
+asignarProb <- function(x){
+  for (i in 1:length(valores)) {
+    if (valores[i] == x){
+       return(probabilidad[i])
+    }
+    
+  }
+}
+#Obtengo un vector de probabilidades para cada valor de mIngreso.
+probabilidades <- lapply(df$mIngreso, asignarProb)
+probabilidades<-unlist(probabilidades)
+#**********************************************************************************
+#----------Genero un train y test data estratificado-------------------------------
+#**********************************************************************************
+set.seed(1)
+sets <- sample(nrow(df), nrow(df)*0.7, prob=probabilidades, replace=F)
+training <- df[sets,]
+testing <- df[-sets,]
+#----------------------------------------------------------------------------------
+#**********************************************************************************
+#---------------------------------K-nearest-neighbours-----------------------------
+#**********************************************************************************
+#Genero las etiquetas.
+cl <- training$mIngreso
+#Normalizo el training y el testing para poder aplicar knn.
+trainingN <-  as.data.frame(lapply(training, function (x) normalize(x)))
+testingN <-  as.data.frame(lapply(testing, function (x) normalize(x)))
+#testingN$mIngreso <- NULL
+#Genero knn, con k=
+knnModel<-knn(trainingN, testingN, cl, k = 3, prob=TRUE)
+length(knnModel)
+matrizconfusion <- table(testing$mIngreso,knnModel,dnn=c("Valor Real", "Prediccion"))
+error <- (sum(knnModel != testing$mIngreso) /nrow(testing))
+acierto <- (1-error)*100
+print(acierto)
+error <- error*100
+
+#**********************************************************************************
+#---------------------------------Arboles de Decision-----------------------------
+#**********************************************************************************
+minsplits <- c(35,35,35,35,35)
+cps <- c( 0.01,0.2,0.1,0.0001,0.0000000000001)
+minbuckets <- c(50,5,10,50,300)
+maxdepths <- c(30,5,10,20,30)
+for (i in 1:length(minsplits)){
+modelo <- rpart(mIngreso ~ ., data = training, method = "class",
+                control = rpart.control(minsplit = minsplits[i], 
+                                        cp = cps[i],minbuckets=minbuckets[i],
+                                        maxdepth = maxdepths[i]))
+
+arbol <- predict(modelo, newdata = testing,type = "class")
+
+matrizconfusion <- table(testing$mIngreso,arbol,dnn=c("Valor Real", "Prediccion"))
+error <- (sum(arbol != testing$mIngreso) /nrow(testing))
+acierto <- (1-error)*100
+print(acierto)
+error <- error*100
+}
