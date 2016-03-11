@@ -15,6 +15,8 @@ install('FactoMineR')
 install('caret')
 install('rpart')
 install('rpart.plot')
+install('RWeka')
+install('pROC')
 install('e1071')
 install('som')
 
@@ -28,7 +30,8 @@ library(rpart)
 library(rpart.plot)
 library(e1071)
 library(som)
-
+library(RWeka)
+library(pROC)
 
 #Leemos el .csv
 df <- read.csv("C:/Users/EricBellet/Desktop/AprendizajeSupervisado/data/minable.csv") 
@@ -78,6 +81,11 @@ df <- select(df, sexo, escuela, aIngreso, sCurso, tGrado, mInscritas,
 
 #ANALISIS EXPLORATORIO DE LOS DATOS
 PCA <- PCA(df)
+sum(df[,"mIngreso"] == 0)
+sum(df[,"mIngreso"] == 1)
+sum(df[,"mIngreso"] == 2)
+sum(df[,"mIngreso"] == 3)
+
 #Obtengo los valore unicos de mIngreso.
 valores <- unique(df$mIngreso)
 totalvalores <- nrow(df)
@@ -116,13 +124,18 @@ testingN <-  as.data.frame(lapply(testing, function (x) normalize(x)))
 #testingN$mIngreso <- NULL
 #Genero knn, con k=
 knnModel<-knn(trainingN, testingN, cl, k = 3, prob=TRUE)
-length(knnModel)
-matrizconfusion <- table(testing$mIngreso,knnModel,dnn=c("Valor Real", "Prediccion"))
-error <- (sum(knnModel != testing$mIngreso) /nrow(testing))
-acierto <- (1-error)*100
-print(acierto)
-error <- error*100
 
+matrizconfusion <- table(testing$mIngreso,knnModel,dnn=c("Valor Real", "Prediccion"))
+
+error <- (sum(knnModel != testing$mIngreso) /nrow(testing))
+aciertoknn <- (1-error)*100
+print(aciertoknn)
+errorknn <- error*100
+
+
+knnModel<-as.numeric(knnModel)
+knnModelROC <- roc(testing$mIngreso, knnModel)
+plot(knnModelROC,type="l",col="red")
 #**********************************************************************************
 #---------------------------------Arboles de Decision-----------------------------
 #**********************************************************************************
@@ -140,7 +153,44 @@ arbol <- predict(modelo, newdata = testing,type = "class")
 
 matrizconfusion <- table(testing$mIngreso,arbol,dnn=c("Valor Real", "Prediccion"))
 error <- (sum(arbol != testing$mIngreso) /nrow(testing))
-acierto <- (1-error)*100
-print(acierto)
-error <- error*100
+aciertoarbol <- (1-error)*100
+errorarbol <- error*100
+print(aciertoarbol)
+print(errorarbol)
 }
+
+
+arbol<-as.numeric(arbol)
+arbolROC <- roc(testing$mIngreso, arbol)
+plot(arbolROC,type="l",col="green")
+
+
+
+#**********************************************************************************
+#---------------------------------Reglas de clasificacion--------------------------
+#**********************************************************************************
+training$mIngreso = as.factor(training$mIngreso)
+modelo <- JRip(mIngreso ~ ., training)
+reglas <- predict(modelo, testing,type = "class")
+
+matrizconfusion <- table(testing$mIngreso,reglas,dnn=c("Valor Real", "Prediccion"))
+error <- (sum(reglas != testing$mIngreso) /nrow(testing))
+aciertoreglas <- (1-error)*100
+print(acierto)
+errorreglas <- error*100
+
+reglas<-as.numeric(reglas)
+reglasROC <- roc(testing$mIngreso, reglas)
+plot(reglasROC,type="l",col="blue")
+#**********************************************************************************
+#---------------------------Comparacion entre los modelos--------------------------
+#**********************************************************************************
+print(paste0("Precisión general de K-nearest-neighbours: ", aciertoknn))
+print(paste0("Precisión general de arboles de decisión: ", aciertoarbol))
+print(paste0("Precisión general de reglas de clasificación: ", aciertoreglas))
+
+plot(reglasROC,type="l",col="blue")
+lines(arbolROC,col="green")
+lines(knnModelROC,col="red")
+legend(0.1,0.4,legend=c('KNN', 'Arboles de decisión', 'Reglas de clasificación'),
+       col=c('red', 'blue', 'green'), lty=1, cex=0.5)

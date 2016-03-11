@@ -273,8 +273,8 @@ df$ValorMinutos2 <- NULL
 df$TuttoIncluido <- NULL
 df$valorInmobiliario <- NULL
 
-#range01 <- function(x){((x-min(x))/(max(x)-min(x)))*10}
-#df$ValorTotal <- range01(df$ValorTotal)
+range01 <- function(x){((x-min(x))/(max(x)-min(x)))*10}
+df$ValorTotal <- range01(df$ValorTotal)
 
 #DIVIDO EL DATAFRAME EN DOS, MUJERES Y HOMBRES.
 df$Sexo <- df$Notas
