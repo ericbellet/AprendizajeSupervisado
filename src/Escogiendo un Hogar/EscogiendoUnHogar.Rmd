@@ -446,15 +446,15 @@ Realizo un analisis exploratorio en ambos dataframes utilizando análisis de comp
 #---------------EN TEORIA EN OTRA PC ESTO DEBE CORRER-------------
 #Selecciono las variables que puedo utilizar para aplicar regresion lineal
 #para realizar un analisis exploratorio de los datos
-#Femenino <- select(dfF, Minutos, TodoIncluido, TipoHabitacion, Pasillo, Cocina, Cuarto, Bagno, #Balcon, Comedor, Armario, Salon, PrecioTotal, ValorTotal)
+Femenino <- select(dfF, Minutos, TodoIncluido, TipoHabitacion, Pasillo, Cocina, Cuarto, Bagno, Balcon, Comedor, Armario, Salon, PrecioTotal, ValorTotal)
 
-#PCA <- PCA(Femenino)
-#plot(PCA, choix = "var")
+PCA <- PCA(Femenino)
+plot(PCA, choix = "var")
 
-#Masculino <- select(dfM, Minutos, TodoIncluido, TipoHabitacion, Pasillo, Cocina,Cuarto, Bagno, #Balcon, Comedor, Armario, Salon, PrecioTotal, ValorTotal)
+Masculino <- select(dfM, Minutos, TodoIncluido, TipoHabitacion, Pasillo, Cocina,Cuarto, Bagno, Balcon, Comedor, Armario, Salon, PrecioTotal, ValorTotal)
 
-#PCA <- PCA(Masculino)
-#plot(PCA, choix = "var")
+PCA <- PCA(Masculino)
+plot(PCA, choix = "var")
 ```
 ## Habitación ideal mediante la generación de pesos o valor
 Obtengo la habitación ideal para un estudiante masculino que esta dispuesto a pagar precios estandares y economicos, utilizando el valor total y el precio.
