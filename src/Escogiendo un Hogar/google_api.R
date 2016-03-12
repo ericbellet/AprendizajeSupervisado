@@ -41,29 +41,22 @@ get_data = function(api_url){
   return(fromJSON(api_url))
 }
 
-# To Complete
+
 parse_data = function(lista){
-  #distancia <- list()
-  #tiempo <- list()
-  #for (i in 1:length(lista$rows$elements)){
-   #distancia[i] <- lista$rows$elements[[i]][1,1][1]  
-   #tiempo[i] <- lista$rows$elements[[i]][1,2][1]
-      
-  #}
+  # Parsea una lista que representa datos en json.
+  #
+  # Args:
+  #   lista: Lista que representa datos en json con el tiempo y distancia entre direcciones.
+  #
+  # Returns:
+  #   Retorna un arreglo con la distancia y el tiempo entre la direccion del apartamento 
+  #   y la universidad Sapienza.
+
+  #Parseo la distancia.
   distancia <- lista$rows$elements[[1]][1,1][1]  
+  #Parseo el tiempo.
   tiempo <- lista$rows$elements[[1]][1,2][1]
- 
-  #dataframe <- data.frame()
-  #dist <- data.frame()
-  #time <- data.frame()
-  
-  #dist <- rbind(dist,distancia)
- 
-  #time <- c(time,tiempo)
-  #time <- rbind(time,tiempo)
-  #dataframe <- cbind(dist,time)
-  
-  
-  return(c(distancia,tiempo))
+ #Retorno la concatenacion de la distancia y el tiempo.
+   return(c(distancia,tiempo))
  
 }

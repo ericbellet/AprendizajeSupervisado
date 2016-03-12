@@ -1,3 +1,14 @@
+---
+title: "Becas Crema"
+author: "Eric Bellet"
+date: "11 de marzo de 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, echo=FALSE, results='hide', include=FALSE}
 install = function(pkg)
 {
   # Si ya está instalado, no lo instala.
@@ -9,7 +20,6 @@ install = function(pkg)
 
 #Instalo automaticamente los paquetes.
 install('readxl')
-#install('dplyr')
 install('jsonlite')
 install('pROC')
 install('FactoMineR')
@@ -17,16 +27,22 @@ install('pscl')
 install('MASS')
 
 library(readxl)
-#library(dplyr)
 library(jsonlite)
 library(pROC)
 library(FactoMineR)
 library(pscl)
 library(MASS)
-#--------------------------------------API----------------------------------------
-# Seleccionar google_api.R en su sistema de archivos
-source(file.choose())
-#source("C:/Users/EricBellet/Desktop/AprendizajeSupervisado/src/Escogiendo un Hogar/google_api.R")
+
+```
+## Introducción
+
+  El objetivo del script **usage.R** es utilizar el API de **Google Maps Distance Matrix API** con la finalidad de obtener la distancia y el tiempo entre una dirección de un apartamento hacia la **Universidad Sapienza** de Roma para utilizarlas como criterio de selección de un hogar adecuado para un estudiante. Posterior al uso del API, se realizará un **preprocesamiento** general del dataset para poder aplicar el algoritmo de aprendizaje supervisado **regresión lineal**.
+  
+## Carga del set de datos y utilización del API
+Utilizo mi propia key para realizar peticiones al API donde la función **parse_data** me devuelve la distancia y el tiempo entre la dirección de un apartamento y la **Universidad Sapienza**.
+
+```{r}
+source("C:/Users/EricBellet/Desktop/AprendizajeSupervisado/src/Escogiendo un Hogar/google_api.R")
 df <- read_excel("C:/Users/EricBellet/Desktop/AprendizajeSupervisado/data/hogares.xlsx")
 df <- na.omit(df)
 df$Foto <- NULL
@@ -38,7 +54,6 @@ Minutos <- vector()
 ori <- vector()
 
 destino =c("Piazzale Aldo Moro")
-origen =c("Via Gatteschi")
 #Realizo un ciclo para hacer peticiones al API dirección por dirección.
 for (origen in df$Dirección){
 #Elimino los \n
@@ -60,8 +75,9 @@ Minutos <- cbind(Minutos)
 #Guardo todos los datos parseados en un dataframe.
 dataframe <- cbind(ori,Distancia,Minutos)
 }#endfor
-#--------------------------------------FIN API----------------------------------------
-#--------------------------------------MINUTOS----------------------------------------
+```
+Transformo el tiempo en un formato único, minutos, y guardo toda la información que me dio el API en un dataframe.
+```{r}
 dataframe <- as.data.frame(dataframe)
 #Tranformamos todos los tiempos a minutos
 enHoras <- grepl("h",dataframe$Minutos)
@@ -90,11 +106,11 @@ for (i in 1:nrow(df)){
   
 }
   
-
-#--------------------------------------FIN MINUTOS----------------------------------------
-#--------------------------------------HABITACIONES----------------------------------------
+```
+Aquellos apartamentos que poseen diversas habitaciones en oferta, coloco cada una en filas distintas, para evaluarlas independientementes.
+```{r}
 #AGREGO FILAS POR CADA HABITACION DISPONIBLE CON SU CORRESPONDIENTE PRECIO.
-df$`Habitaciones Disponibles`
+
 df$Disponibles[grepl("1 singola", df$`Habitaciones Disponibles`)] <- "1"
 df$Disponibles[grepl("1 singole", df$`Habitaciones Disponibles`)] <- "1"
 df$Disponibles[grepl("1 Singola", df$`Habitaciones Disponibles`)] <- "1"
@@ -124,7 +140,9 @@ df$Disponibles[is.na(df$Disponibles)] <- 1
 
 #Replico las filas que posee mas de una habitacion disponible.
 df <- df[rep(seq_len(nrow(df)), df$Disponibles),]
-
+```
+Posteriormente asigno el precio correspondiente a cada habitación.
+```{r}
 #Asigno precio a cada habitacion.
 i <- 1
 while (i != (nrow(df)+1)) {
@@ -141,8 +159,9 @@ while (i != (nrow(df)+1)) {
  }
 
 }#endwhile
-#--------------------------------------FIN HABITACIONES----------------------------------------
-#--------------------------------------PRECIO MENSUAL----------------------------------------
+```
+Genero 2 nuevas columnas, una donde categorizo si el precio de la habitación tiene todo incluido o no, **TodoIncluido** y otra columna que representa un valor o puntación que le asigne desde mi punto personal, **100** en caso de que este todo incluido y **0** en caso contrario. Estos valores representan el valor personal de la habitación donde mas alto sea mayor importancia tiene.
+```{r}
 #Creo una columna donde coloco el valor si esta todo incluido o no.
 df$TuttoIncluido[grepl("TUTTO INCLUSO", df$`Precio Mensual`)] <- 100
 df$TuttoIncluido[grepl("Tutto incluso", df$`Precio Mensual`)] <- 100
@@ -154,8 +173,19 @@ df$TodoIncluido[grepl("TUTTO INCLUSO", df$`Precio Mensual`)] <- 1
 df$TodoIncluido[grepl("Tutto incluso", df$`Precio Mensual`)] <- 1
 df$TodoIncluido[grepl("tutto incluso", df$`Precio Mensual`)] <- 1
 df$TodoIncluido[is.na(df$TodoIncluido)] <- 0
-#--------------------------------------FIN PRECIO MENSUAL----------------------------------------
-#--------------------------------------DESCRIPCION----------------------------------------
+```
+Posteriormente creo diferentes columnas a partir de la columna Descripción.
+
+*Pasillo: Una columna que indica cuantos hay en el apartamento.
+*Cocina: Una columna que indica cuantos hay en el apartamento.
+*Cuarto: Una columna que indica cuantos hay en el apartamento. 
+*Bagno: Una columna que indica cuantos hay en el apartamento. 
+*Balcon: Una columna que indica cuantos hay en el apartamento. 
+*Comedor: Una columna que indica cuantos hay en el apartamento.
+*Armario: Una columna que indica cuantos hay en el apartamento.
+*Salon: Una columna que indica cuantos hay en el apartamento.
+*Descripción3: Una columna que indica un valor personal a cada componente del apartamento.
+```{r}
 #Etiqueto la columna descripcion donde separo por coma y e (solo el conector).
 separador <- function(x)
   splat <- unlist(strsplit(x, ", | e "))
@@ -278,7 +308,9 @@ for (i in 1:nrow(df)) {
   }#endfor
 }#endfor
 #MUESTRA UN WARNING QUE EN REALIDAD NO CAUSA NINGUN PROBLEMA
-#--------------------------------------FIN DESCRIPCION----------------------------------------
+```
+Creo una columna llamada TipoHabitacion donde se encuentran las categorias de las habitaciones disponibles, **Intero Appartamento**, **monolocale**, **singola**, entre otros.
+```{r}
 #Categorizo los tipos de habitacion.
 df$TipoHabitacion[grepl("Intero Appartamento", df$`Habitaciones Disponibles`)] <- "1"
 df$TipoHabitacion[grepl("Intero appartamento", df$`Habitaciones Disponibles`)] <- "1"
@@ -295,7 +327,9 @@ df$TipoHabitacion[grepl("singola", df$`Habitaciones Disponibles`)] <- "3"
 df$TipoHabitacion[grepl("singole", df$`Habitaciones Disponibles`)] <- "3"
 df$TipoHabitacion[grepl("Singola", df$`Habitaciones Disponibles`)] <- "3"
 df$TipoHabitacion[grepl("Singole", df$`Habitaciones Disponibles`)] <- "3"
-
+```
+Finalmente utilizo la columna valorTotal, que representa valores del 1 al 10 donde 10 es la ponderación más alta del inmueble. El valortotal es igual al valor en tiempo (donde menor sea el tiempo de la residencia a la Universidad el valor es más alto), mas el valor del inmueble (cuantos baños tiene, si tiene cocina, balcon, etc), mas el valor de si el precio tiene todo incluido.
+```{r}
 #-------------------Cual es la mejor habitacion-------------------------
 #df$Disponibles <- NULL
 #df$Descripción2 <- NULL
@@ -317,6 +351,10 @@ range01 <- function(x){((x-min(x))/(max(x)-min(x)))*10}
 df$ValorTotal <- range01(df$ValorTotal)
 df$TipoHabitacion <- as.numeric(df$TipoHabitacion)
 
+```
+## Separación por sexo
+Creo 2 nuevos dataframes uno para mujeres y otro para hombres para aplicar regresión lineal a cada uno, ya que es posible que el precio sea afectado por el sexo por lo tanto es mejor evaluarlos por separado.
+```{r}
 df$Disponibles <- as.numeric(df$Disponibles)
 df$TipoHabitacion <- as.numeric(df$TipoHabitacion)
 #DIVIDO EL DATAFRAME EN DOS, MUJERES Y HOMBRES.
@@ -336,6 +374,10 @@ dfF$Sexo <- NULL
 dfM$Notas <- NULL
 dfF$Notas <- NULL
 
+```
+## Training y testing data
+Genero un training y testing estratificado para ambos dataframes.
+```{r}
 #************************************************************************************
 #--------------------------SAMPLING PARA MASCULINO----------------------------------
 #************************************************************************************
@@ -394,25 +436,32 @@ set.seed(1)
 sets <- sample(nrow(dfF), nrow(dfF)*0.8, prob=probabilidades, replace=F)
 trainingF <- dfF[sets,]
 testingF <- dfF[-sets,]
-#---------------------------------------------------------------------------
+```
+## Análisis exploratorio de los datos
+Realizo un analisis exploratorio en ambos dataframes utilizando análisis de componentes principales. Podemos observar que minutos y precio estan correlacionados, tiene sentido pensar que mientras menos tiempo tarde en llegar el estudiante a la Universidad Sapienza mas caro es la habitación. El dataset son apartamentos que ofrece la Sapienza para estudiantes. Sin embargo no sabemos mediante cuales medios de transporte pudieron realizar estos precios, es posible que si el apartamento queda a 20 minutos a pie de la universidad le hayan dado cierto valor, sin embargo es posible que un apartamento quede a 20 minutos en metro. 
+```{r}
 #************************************************************************************
 #----------------------ANALISIS EXPLORATORIO DE LOS DATOS----------------------------
 #************************************************************************************
 #Selecciono las variables que puedo utilizar para aplicar regresion lineal
 #para realizar un analisis exploratorio de los datos
 
-Femenino <- select(dfF, Minutos, TodoIncluido, TipoHabitacion, Pasillo, Cocina, Cuarto, Bagno, Balcon, Comedor, Armario, 
+Femenino <- select(dfF, Minutos, TodoIncluido, TipoHabitacion, 
+                           Pasillo, Cocina, Cuarto, Bagno, Balcon, Comedor, Armario, 
                            Salon, PrecioTotal, ValorTotal)
 
 PCA <- PCA(Femenino)
 plot(PCA, choix = "var")
-
-Masculino <- select(dfM, Minutos, TodoIncluido, TipoHabitacion, Pasillo, Cocina,Cuarto, Bagno, Balcon, Comedor, Armario, 
+Masculino <- select(dfM, Minutos, TodoIncluido, TipoHabitacion, 
+                            Pasillo, Cocina,Cuarto, Bagno, Balcon, Comedor, Armario, 
                             Salon, PrecioTotal, ValorTotal)
 
 PCA <- PCA(Masculino)
 plot(PCA, choix = "var")
-
+```
+## Habitación ideal mediante la generación de pesos o valor
+Obtengo la habitación ideal para un estudiante masculino que esta dispuesto a pagar precios estandares y economicos, utilizando el valor total y el precio.
+```{r}
 #OBTENGO LA MEJOR HABITACION PARA HOMBRE.
 dfM <- dfM[order(dfM$PrecioTotal) , ]
 medianaMM <- median(dfM$PrecioTotal)
@@ -423,8 +472,9 @@ print(mejorHabitacionesM$Dirección)
 print(mejorHabitacionesM$Descripción)
 print(mejorHabitacionesM$PrecioTotal)
 print(mejorHabitacionesM$ValorTotal)
-#----------------------------------------------------------------
-
+```
+Obtengo la habitación ideal para un estudiante femenino que esta dispuesto a pagar precios estandares y economicos, utilizando el valor total y el precio.
+```{r}
 #OBTENGO LA MEJOR HABITACION PARA LAS MUJERES.
 dfF <- dfF[order(dfF$PrecioTotal) , ]
 medianaMF <- median(dfF$PrecioTotal)
@@ -435,16 +485,14 @@ print(mejorHabitacionesF$Dirección)
 print(mejorHabitacionesF$Descripción)
 print(mejorHabitacionesF$PrecioTotal)
 print(mejorHabitacionesF$ValorTotal)
-#----------------------------------------------------------------
+```
+## Selección de variables para regresión lineal
+Gracias al análisis exploratorio de los datos pude observar que no hay una variable que tenga una relación fuerte con el precio, es decir un X que me prediga un Y (regresión simple). Pero hay varias variables que si tienen un nivel de correlación con el precio, por lo tanto una regresión lineal múltiple me parece adecuado para obtener una predicción del precio más precisa, sin embargo elegir cuales variables es algo que hay que analizar. Utilizando PCA tuve una idea aproximada, pero utilizaré la selección de variables por pasos (forward, backward, both) utilizando la función stepAIC () del paquete MASS. stepAIC () realiza la selección del modelo paso a paso por la AIC exacta.
 
 
-#************************************************************************************
-#--------------------------REGRESION LINEAL-----------------------------------------
-#************************************************************************************
-#Selección de variables
-#Realice la selección de variables por pasos (forward, backward, both) utilizando la 
-#función stepAIC () del paquete MASS.  stepAIC () realiza la selección del modelo paso 
-#a paso por la AIC exacta.
+Primero aplico regresión lineal con todas las variables con el dataset de sexo masculino.
+
+```{r}
 #------------------------------MASCULINO------------------------------------------
 #Aplico regresion lineal con todas las variables
 modeloM1 <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Pasillo +
@@ -452,22 +500,29 @@ modeloM1 <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Pasillo +
                ValorTotal,data = trainingM)
 
 regresionM1 <- predict(modeloM1, newdata = testingM)
-
+#-----------------------------FIN MASCULINO------------------------------------------
+```
+Evalúo con la función stepAIC, y busco las mejores variables para predecir.
+```{r}
 #Evaluo, y busco las mejores variables para predecir
 step <- stepAIC(modeloM, direction="both")
-step$anova # display results
-
-#En teoria las mejores variables para predecir son:
+step$anova #muestro los resultados
+```
+Aplico regresión lineal con las variables seleccionadas por la función stepAIC.
+```{r}
 modeloM2 <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Balcon,data = trainingM)
 
 regresionM2 <- predict(modeloM2, newdata = testingM)
-
+```
+## Comparación entre ambos modelos de regresión lineal
+```{r}
 anova(modeloM1, modeloM2)
 comparacionM <- cbind(regresionM2,testingM$PrecioTotal )
+```
 
+Primero aplico regresión lineal con todas las variables con el dataset de sexo femenino.
 
-
-#-----------------------------FIN MASCULINO------------------------------------------
+```{r}
 #------------------------------FEMENINO------------------------------------------
 #Aplico regresion lineal con todas las variables
 modeloF1 <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Pasillo +
@@ -475,20 +530,28 @@ modeloF1 <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Pasillo +
                  ValorTotal,data = trainingF)
 
 regresionF1 <- predict(modeloF1, newdata = testingF)
-
-#Evaluo, y busco las mejores variables para predecir
+```
+Evalúo con la función stepAIC, y busco las mejores variables para predecir.
+```{r}
 step <- stepAIC(modeloF, direction="both")
 step$anova # display results
 
-#En teoria las mejores variables para predecir son:
+```
+Aplico regresión lineal con las variables seleccionadas por la función stepAIC.
+```{r}
 modeloF2 <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Balcon,data = trainingF)
 
 regresionF2 <- predict(modeloF2, newdata = testingF)
 
+```
+## Comparación entre ambos modelos de regresión lineal
+```{r}
 anova(modeloM1, modeloM2)
 comparacionF <- cbind(regresionF2,testingF$PrecioTotal )
-#-----------------------------FIN FEMENINO------------------------------------------
-
+```
+## Habitación ideal para el estudiante utilizando regresión lineal
+Se puede decidir cual es el inmueble adecuado para el estudiante utilizando regresión lineal, se toman los apartamentos con precios intermedios y bajos, y luego seleccionamos el precio más alto que propuso la regresión lineal.
+```{r}
 #utilizando regresion lineal para decidir el mejor apto.
 #OBTENGO LA MEJOR HABITACION PARA HOMBRE.
 hombre <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Balcon,data = dfM)
@@ -505,7 +568,9 @@ print(mejorHabitacionesM$Dirección)
 print(mejorHabitacionesM$Descripción)
 print(mejorHabitacionesM$PrecioTotal)
 print(mejorHabitacionesM$ValorTotal)
+```
 
+```{r}
 #OBTENGO LA MEJOR HABITACION PARA LAS MUJERES.
 mujer <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Balcon,data = dfF)
 
@@ -522,6 +587,4 @@ print(mejorHabitacionesF$Descripción)
 print(mejorHabitacionesF$PrecioTotal)
 print(mejorHabitacionesF$ValorTotal)
 
-
-
-
+```

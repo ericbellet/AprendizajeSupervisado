@@ -315,6 +315,15 @@ print(paste0("Precisión general de reglas de clasificación: ", aciertoreglas))
 Observamos que el modelo de **K-nearest-neighbours** es el que posee la mayor precisión general.
 
 Podemos observar la **curva de ROC** de los 3 modelos:
+
+
+La sensibilidad es la probabilidad de clasificar correctamente a un individuo cuyo
+estado real es definido como positivo, respecto a la condición de prueba. 
+
+
+La especifidad es la probabilidad de clasificar correctamente a un individuo cuyo
+estado real es definido como negativo, respecto a la condición de prueba.
+
 ```{r,  echo=FALSE}
 plot(reglasROC,type="l",col="blue")
 lines(arbolROC,col="green")

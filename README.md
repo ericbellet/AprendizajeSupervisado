@@ -3,28 +3,31 @@
 
 ## Tabla de contenido
 
-* [Quick start](#quick-start)
-* [Qué se encuentra incluido?](#qué-se-encuentra-incluido?)
-* [Versiones](#versiones)
-* [Creators](#creators)
+* [Contenido](#contenido)
+* [Referencias](#referencias)
+* [Integrantes](#integrantes)
 
 
-## Quick start
+### Contenido
+* En la carpeta docs -> Explicación de Becas Crema.
+* En la carpeta docs -> Explicacion de escogiendo un hogar.
+* En la carpeta docs -> asignacion_2.
+* En la carpeta src/Escogiendo un Hogar -> usage.R.
+* En la carpeta src/Escogiendo un Hogar -> google_api.R.
+* En la carpeta src/Escogiendo un Hogar -> EscogiendoUnHogar.RMD.
+* En la carpeta src/Becas Crema-> BecasCrema.R.
+* En la carpeta src/Becas Crema-> BecasCrema_api.RMD.
 
+* En la carpeta data -> Dataset de hogares.
+* En la carpeta data -> Dataset de vista minable Becas Crema.
 
-* 
+## Referencias
+* https://www.otexts.org/fpp/5/3
+* https://rstudio-pubs-static.s3.amazonaws.com/2897_9220b21cfc0c43a396ff9abf122bb351.html
+* http://www.statmethods.net/stats/regression.html
 
-### Qué se encuentra incluido?
-
-
-## Versiones
-
-
-
-
-## Creator
+## Integrantes
 
 **Eric Bellet**
-
 
 
