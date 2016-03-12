@@ -12,11 +12,12 @@
 * En la carpeta docs -> Explicación de Becas Crema.
 * En la carpeta docs -> Explicacion de escogiendo un hogar.
 * En la carpeta docs -> asignacion_2.
+
 * En la carpeta src/Escogiendo un Hogar -> usage.R.
 * En la carpeta src/Escogiendo un Hogar -> google_api.R.
 * En la carpeta src/Escogiendo un Hogar -> EscogiendoUnHogar.RMD.
 * En la carpeta src/Becas Crema-> BecasCrema.R.
-* En la carpeta src/Becas Crema-> BecasCrema_api.RMD.
+* En la carpeta src/Becas Crema-> BecasCrema.RMD.
 
 * En la carpeta data -> Dataset de hogares.
 * En la carpeta data -> Dataset de vista minable Becas Crema.

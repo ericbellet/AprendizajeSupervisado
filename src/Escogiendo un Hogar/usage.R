@@ -454,7 +454,7 @@ modeloM1 <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Pasillo +
 regresionM1 <- predict(modeloM1, newdata = testingM)
 
 #Evaluo, y busco las mejores variables para predecir
-step <- stepAIC(modeloM, direction="both")
+step <- stepAIC(modeloM1, direction="both")
 step$anova # display results
 
 #En teoria las mejores variables para predecir son:
@@ -477,7 +477,7 @@ modeloF1 <- lm(PrecioTotal ~ Minutos + TodoIncluido + TipoHabitacion + Pasillo +
 regresionF1 <- predict(modeloF1, newdata = testingF)
 
 #Evaluo, y busco las mejores variables para predecir
-step <- stepAIC(modeloF, direction="both")
+step <- stepAIC(modeloF1, direction="both")
 step$anova # display results
 
 #En teoria las mejores variables para predecir son:

@@ -82,7 +82,7 @@ library(pROC)
   Realizo la carga del set de datos y obtengo el gasto total e ingreso total del estudiante y del responsable económico para utilizarlos para predecir.
 
 ```{r}
-df <- read.csv("AprendizajeSupervisado/data/minable.csv") 
+df <- read.csv("C:/Users/EricBellet/Desktop/AprendizajeSupervisado/data/minable.csv") 
 #Calculamos los ingresos personales del estudiante.
 df$IngresosTotalPersonal <- df$aResponsable + df$iActividades + df$aOtros
 
