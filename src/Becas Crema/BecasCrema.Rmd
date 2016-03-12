@@ -328,6 +328,6 @@ estado real es definido como negativo, respecto a la condición de prueba.
 plot(reglasROC,type="l",col="blue")
 lines(arbolROC,col="green")
 lines(knnModelROC,col="red")
-legend(0.1,0.4,legend=c('KNN', 'Arboles de decisión', 'Reglas de clasificación'),col=c('red', 'blue', 'green'), lty=1, cex=0.5)
+legend(0.1,0.4,legend=c('KNN', 'Reglas de clasificación','Arboles de decisión'),col=c('red', 'blue', 'green'), lty=1, cex=0.5)
 ```
 Podemos concluir que el modelo de **K-nearest-neighbours** es el que mejor predice la modalidad de ingreso del dataset de **Becas Crema**.

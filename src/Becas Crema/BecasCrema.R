@@ -192,5 +192,5 @@ print(paste0("Precisión general de reglas de clasificación: ", aciertoreglas))
 plot(reglasROC,type="l",col="blue")
 lines(arbolROC,col="green")
 lines(knnModelROC,col="red")
-legend(0.1,0.4,legend=c('KNN', 'Arboles de decisión', 'Reglas de clasificación'),
+legend(0.1,0.4,legend=c('KNN', 'Reglas de clasificación','Arboles de decisión'),
        col=c('red', 'blue', 'green'), lty=1, cex=0.5)
